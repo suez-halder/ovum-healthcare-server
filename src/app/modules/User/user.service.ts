@@ -1,11 +1,14 @@
 import { PrismaClient, UserRole } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 const createAdmin = async (payload: any) => {
+    const hashedPassword: string = bcrypt.hashSync(payload.password, 12);
+
     const userData = {
         email: payload.admin.email,
-        password: payload.password,
+        password: hashedPassword,
         role: UserRole.ADMIN,
     };
 
