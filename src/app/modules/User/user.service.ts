@@ -1,3 +1,5 @@
+//* src/app/modules/User/user.service.ts
+
 import { PrismaClient, UserRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 
