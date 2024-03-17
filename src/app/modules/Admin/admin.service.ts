@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const getAllAdminsFromDB = async (params: any) => {
     const { searchTerm, ...filterData } = params;
-    console.log(filterData);
+    // console.log(filterData);
     // ------------------------------------ //
     //! Implementing Searching Functionality
     // ------------------------------------ //
@@ -40,9 +40,9 @@ const getAllAdminsFromDB = async (params: any) => {
         });
     }
 
-    // ------------------------------------ //
-    //! Implementing Filtering Functionality
-    // ------------------------------------ //
+    // ------------------------------------------------------- //
+    //! Implementing Filtering Functionality on specific field
+    // ------------------------------------------------------- //
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
             AND: Object.keys(filterData).map((key) => ({
@@ -53,7 +53,7 @@ const getAllAdminsFromDB = async (params: any) => {
         });
     }
 
-    console.dir(andConditions, { depth: Infinity });
+    // console.dir(andConditions, { depth: Infinity });
 
     const whereConditions: Prisma.AdminWhereInput = { AND: andConditions };
 
