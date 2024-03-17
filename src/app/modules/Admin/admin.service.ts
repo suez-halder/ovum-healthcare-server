@@ -4,9 +4,11 @@ import { adminSearchableFields } from "./admin.constant";
 
 const prisma = new PrismaClient();
 
-const getAllAdminsFromDB = async (params: any) => {
+const getAllAdminsFromDB = async (params: any, options: any) => {
     const { searchTerm, ...filterData } = params;
+    const { limit, page } = options;
     // console.log(filterData);
+
     // ------------------------------------ //
     //! Implementing Searching Functionality
     // ------------------------------------ //
@@ -59,6 +61,19 @@ const getAllAdminsFromDB = async (params: any) => {
 
     const result = await prisma.admin.findMany({
         where: whereConditions,
+        // ------------------------- //
+        //! Implementing Pagination
+        // ------------------------- //
+        /*  data = 1, 2, 3, 4, 5, 6, 7, 8
+            page = 2
+            limit = 2
+
+            skip = 2
+            -- FORMULA = (page - 1) * limit --
+        */
+
+        skip: (Number(page) - 1) * limit,
+        take: Number(limit),
     });
     return result;
 };

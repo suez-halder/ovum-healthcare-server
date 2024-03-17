@@ -8,7 +8,9 @@ import { AdminServices } from "./admin.service";
 const getAllAdminsFromDB = async (req: Request, res: Response) => {
     try {
         const filters = pick(req.query, adminFilterableFields);
-        const result = await AdminServices.getAllAdminsFromDB(filters);
+        const options = pick(req.query, ["limit", "page"]);
+
+        const result = await AdminServices.getAllAdminsFromDB(filters, options);
 
         res.status(200).json({
             success: true,
