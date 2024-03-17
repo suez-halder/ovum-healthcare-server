@@ -1,4 +1,4 @@
-//* src/app/shared/pick.ts
+//* src/shared/pick.ts
 
 //! Selecting Data Fields for Filtering and Searching : vul search/filtering field dile ignore korbe, sothik dile search/filter kaaj korbe
 const pick = <T extends Record<string, unknown>, k extends keyof T>(
