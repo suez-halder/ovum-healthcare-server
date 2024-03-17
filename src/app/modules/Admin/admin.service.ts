@@ -1,9 +1,8 @@
 //* src/app/modules/Admin/admin.service.ts
 import { Prisma, PrismaClient } from "@prisma/client";
 import { paginationHelper } from "../../../helpers/paginationHelper";
+import prisma from "../../../shared/prisma";
 import { adminSearchableFields } from "./admin.constant";
-
-const prisma = new PrismaClient();
 
 const getAllAdminsFromDB = async (params: any, options: any) => {
     const { searchTerm, ...filterData } = params;
