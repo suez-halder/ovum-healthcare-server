@@ -7,6 +7,7 @@ import { AdminRoutes } from "./app/modules/Admin/admin.routes";
 import router from "./app/routes";
 import httpStatus from "http-status";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
+import notFound from "./shared/notFound";
 
 const app: Application = express();
 
@@ -27,5 +28,8 @@ app.use("/api/v1", router);
 
 // error handler
 app.use(globalErrorHandler);
+
+// notFound routes
+app.use(notFound);
 
 export default app;
