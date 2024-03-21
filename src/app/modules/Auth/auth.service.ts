@@ -1,13 +1,15 @@
 //* src/app/modules/Auth/auth.service.ts
 import prisma from "../../../shared/prisma";
 import * as bcrypt from "bcrypt";
-import { jwtHelper } from "../../../helpers/jwtHelper";
-import jwt from "jsonwebtoken";
+import { jwtHelpers } from "../../../helpers/jwtHelpers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { UserStatus } from "@prisma/client";
 
 const loginUser = async (payload: { email: string; password: string }) => {
     const userData = await prisma.user.findUniqueOrThrow({
         where: {
             email: payload.email,
+            status: UserStatus.ACTIVE,
         },
     });
 
@@ -24,7 +26,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     //!  Access Token !//
     // * ---------------- * //
 
-    const accessToken = jwtHelper.generateToken(
+    const accessToken = jwtHelpers.generateToken(
         {
             email: userData.email,
             drole: userData.role,
@@ -37,7 +39,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     //!  Set Refresh Token into Cookie
     // * ----------------------------- * //
 
-    const refreshToken = jwtHelper.generateToken(
+    const refreshToken = jwtHelpers.generateToken(
         {
             email: userData.email,
             role: userData.role,
@@ -60,7 +62,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
 const refreshToken = async (token: string) => {
     let decodedData;
     try {
-        decodedData = jwt.verify(token, "gggnnnnqt");
+        decodedData = jwtHelpers.verifyToken(token, "gggnnnnqt");
         // console.log(decodedData);
     } catch (err) {
         throw new Error("You are not authorized!");
@@ -69,10 +71,11 @@ const refreshToken = async (token: string) => {
     const userData = await prisma.user.findUniqueOrThrow({
         where: {
             email: decodedData?.email,
+            status: UserStatus.ACTIVE,
         },
     });
 
-    const accessToken = jwtHelper.generateToken(
+    const accessToken = jwtHelpers.generateToken(
         {
             email: userData.email,
             drole: userData.role,
