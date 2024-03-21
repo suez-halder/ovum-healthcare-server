@@ -1,7 +1,7 @@
 //* src/app/modules/User/user.service.ts
 
 import { PrismaClient, UserRole } from "@prisma/client";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import prisma from "../../../shared/prisma";
 
 const createAdmin = async (payload: any) => {

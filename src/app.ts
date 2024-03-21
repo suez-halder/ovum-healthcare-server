@@ -2,12 +2,10 @@
 
 import express, { Application, NextFunction, Request, Response } from "express";
 import cors from "cors";
-import { UserRoutes } from "./app/modules/User/user.routes";
-import { AdminRoutes } from "./app/modules/Admin/admin.routes";
 import router from "./app/routes";
-import httpStatus from "http-status";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./shared/notFound";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -16,6 +14,9 @@ app.use(cors());
 //parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// we have to use cookie parser to get refresh token cookies
+app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
     res.send({
