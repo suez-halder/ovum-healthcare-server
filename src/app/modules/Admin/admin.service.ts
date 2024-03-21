@@ -126,7 +126,7 @@ const getAdminByIdFromDB = async (id: string): Promise<Admin | null> => {
 };
 
 // * -------------------------- * //
-//! UPDATE Admin by ID
+//!  UPDATE Admin by ID
 // * -------------------------- * //
 
 //* foreign key update korte parbona -> email
@@ -134,8 +134,8 @@ const getAdminByIdFromDB = async (id: string): Promise<Admin | null> => {
 const updateAdminIntoDB = async (
     id: string,
     data: Partial<Admin>
-): Promise<Admin | null> => {
-    const isAdminExist = await prisma.admin.findUniqueOrThrow({
+): Promise<Admin> => {
+    await prisma.admin.findUniqueOrThrow({
         where: {
             id,
             isDeleted: false,
@@ -153,7 +153,7 @@ const updateAdminIntoDB = async (
 };
 
 // * -------------------------- * //
-//! DELETE Admin by ID
+//!  DELETE Admin by ID
 // * -------------------------- * //
 
 const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
@@ -183,7 +183,7 @@ const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
 };
 
 // * -------------------------- * //
-//! Soft DELETE
+//!  Soft DELETE
 // * -------------------------- * //
 
 const softDeleteAdminFromDB = async (id: string): Promise<Admin | null> => {
