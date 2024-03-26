@@ -240,6 +240,25 @@ const getAllUsersFromDB = async (params: any, options: TPaginationOptions) => {
                 : {
                       createdAt: "desc",
                   },
+        // ! password dekhte chaina response e
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            needPasswordChange: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            // select use korle include deya jaabena, tokhn eivabe deya jaay
+            admin: true,
+            doctor: true,
+            patient: true,
+        },
+        // include: {
+        //     admin: true,
+        //     doctor: true,
+        //     patient: true,
+        // }
     });
 
     const total = await prisma.user.count({
