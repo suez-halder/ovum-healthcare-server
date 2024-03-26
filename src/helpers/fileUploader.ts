@@ -29,7 +29,7 @@ const upload = multer({ storage: storage });
 const uploadToCloudinary = async (
     file: TFile
 ): Promise<TCloudinaryResponse | undefined> => {
-    console.log({ file });
+    // console.log({ file });
 
     return new Promise((resolve, reject) => {
         cloudinary.uploader.upload(
