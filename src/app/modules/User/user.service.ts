@@ -1,18 +1,32 @@
 //* src/app/modules/User/user.service.ts
 
-import { PrismaClient, UserRole } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import config from "../../../config";
+import { fileUploader } from "../../../helpers/fileUploader";
 import prisma from "../../../shared/prisma";
 
-const createAdmin = async (payload: any) => {
+const createAdmin = async (req: any) => {
+    // console.log("File: ", req.file);
+    // console.log("Data: ", req.body.data);
+
+    const file = req.file;
+
+    // console.log(req.body);
+
+    if (file) {
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        req.body.admin.profilePhoto = uploadToCloudinary?.secure_url;
+        // console.log(req.body);
+    }
+
     const hashedPassword: string = bcrypt.hashSync(
-        payload.password,
-        Number(config.salt_rounds) as number
+        req.body.password,
+        Number(config.salt_rounds)
     );
 
     const userData = {
-        email: payload.admin.email,
+        email: req.body.admin.email,
         password: hashedPassword,
         role: UserRole.ADMIN,
     };
@@ -24,7 +38,7 @@ const createAdmin = async (payload: any) => {
         });
 
         const createdAdminData = await transactionClient.admin.create({
-            data: payload.admin,
+            data: req.body.admin,
         });
 
         return createdAdminData;
