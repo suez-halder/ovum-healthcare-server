@@ -20,7 +20,7 @@ router.post(
     fileUploader.upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = userValidation.createAdmin.parse(JSON.parse(req.body.data));
-        return userController.createAdmin(req, res);
+        return userController.createAdmin(req, res, next);
     }
 );
 
@@ -34,7 +34,7 @@ router.post(
     fileUploader.upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = userValidation.createDoctor.parse(JSON.parse(req.body.data));
-        return userController.createDoctor(req, res);
+        return userController.createDoctor(req, res, next);
     }
 );
 // * -------------------------- * //
@@ -43,19 +43,19 @@ router.post(
 
 router.post(
     "/create-patient",
-    auth(
-        UserRole.SUPER_ADMIN,
-        UserRole.ADMIN,
-        UserRole.DOCTOR,
-        UserRole.PATIENT
-    ),
     fileUploader.upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = userValidation.createPatient.parse(
             JSON.parse(req.body.data)
         );
-        return userController.createPatient(req, res);
+        return userController.createPatient(req, res, next);
     }
 );
+
+// * -------------- * //
+//!  Get All Users
+// * -------------- * //
+
+router.get("/", userController.getAllUsersFromDB);
 
 export const UserRoutes = router;

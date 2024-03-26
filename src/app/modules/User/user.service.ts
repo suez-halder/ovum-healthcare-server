@@ -1,23 +1,27 @@
 //* src/app/modules/User/user.service.ts
 
-import { UserRole } from "@prisma/client";
+import { Admin, Doctor, Patient, Prisma, UserRole } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+import { Request } from "express";
 import config from "../../../config";
 import { fileUploader } from "../../../helpers/fileUploader";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import { TFile } from "../../interfaces/file.types";
+import { TPaginationOptions } from "../../interfaces/pagination.types";
+import { userSearchableFields } from "./user.constant";
 
 // * -------------------------- * //
 //! Create Admin
 // * -------------------------- * //
 
-const createAdmin = async (req: any) => {
+const createAdmin = async (req: Request): Promise<Admin> => {
     // console.log("File: ", req.file);
     // console.log("Data: ", req.body.data);
 
     const file = req.file as TFile;
 
-    // console.log(req.body);
+    // console.log(req.fbody);
 
     if (file) {
         const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
@@ -57,7 +61,7 @@ const createAdmin = async (req: any) => {
 //!  Create Doctor
 // * -------------------------- * //
 
-const createDoctor = async (req: any) => {
+const createDoctor = async (req: Request): Promise<Doctor> => {
     // console.log("File: ", req.file);
     // console.log("Data: ", req.body.data);
 
@@ -102,7 +106,7 @@ const createDoctor = async (req: any) => {
 //!  Create Patient
 // * -------------------------- * //
 
-const createPatient = async (req: any) => {
+const createPatient = async (req: Request): Promise<Patient> => {
     // console.log("File: ", req.file);
     // console.log("Data: ", req.body.data);
 
@@ -144,8 +148,117 @@ const createPatient = async (req: any) => {
     return result;
 };
 
+// * -------------------------------- * //
+//! Get All Users with Filtering/Searching
+// * -------------------------------- * //
+
+const getAllUsersFromDB = async (params: any, options: TPaginationOptions) => {
+    console.log(params);
+    const { searchTerm, ...filterData } = params;
+    const { page, limit, skip } = paginationHelper.calculatePagination(options);
+    // console.log(filterData);
+
+    // -------------------------- //
+    //? Search Functionality
+    // -------------------------- //
+    const andConditions: Prisma.UserWhereInput[] = [];
+
+    /*  Format:
+            [
+                {
+                    name: {
+                        contains: params.searchTerm,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    email: {
+                        contains: params.searchTerm,
+                        mode: "insensitive",
+                    },
+                },
+            ],
+     */
+
+    if (params.searchTerm) {
+        andConditions.push({
+            OR: userSearchableFields.map((field) => ({
+                [field]: {
+                    contains: params.searchTerm,
+                    mode: "insensitive",
+                },
+            })),
+        });
+    }
+
+    // -------------------------------------------- //
+    //? Filter Functionality on specific field
+    // -------------------------------------------- //
+    if (Object.keys(filterData).length > 0) {
+        andConditions.push({
+            AND: Object.keys(filterData).map((key) => ({
+                [key]: {
+                    equals: (filterData as any)[key],
+                },
+            })),
+        });
+    }
+
+    // console.dir(andConditions, { depth: Infinity });
+
+    const whereConditions: Prisma.UserWhereInput =
+        andConditions.length > 0 ? { AND: andConditions } : {};
+
+    const result = await prisma.user.findMany({
+        where: whereConditions,
+
+        // -------------- //
+        //? Pagination
+        // -------------- //
+        /*  data = 1, 2, 3, 4, 5, 6, 7, 8
+            page = 2
+            limit = 2
+
+            skip = 2
+            -- FORMULA = (page - 1) * limit --
+        */
+
+        // skip: (Number(page) - 1) * limit,
+        // take: Number(limit),
+
+        skip,
+        take: limit,
+
+        // ---------- //
+        //? Sorting
+        // ---------- //
+        orderBy:
+            options.sortBy && options.sortOrder
+                ? {
+                      [options.sortBy]: options.sortOrder,
+                  }
+                : {
+                      createdAt: "desc",
+                  },
+    });
+
+    const total = await prisma.user.count({
+        where: whereConditions,
+    });
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+};
+
 export const userService = {
     createAdmin,
     createDoctor,
     createPatient,
+    getAllUsersFromDB,
 };
