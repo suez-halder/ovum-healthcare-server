@@ -5,17 +5,19 @@ import * as bcrypt from "bcrypt";
 import config from "../../../config";
 import { fileUploader } from "../../../helpers/fileUploader";
 import prisma from "../../../shared/prisma";
+import { TFile } from "../../interfaces/file.types";
 
 const createAdmin = async (req: any) => {
     // console.log("File: ", req.file);
     // console.log("Data: ", req.body.data);
 
-    const file = req.file;
+    const file = req.file as TFile;
 
     // console.log(req.body);
 
     if (file) {
         const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        console.log(uploadToCloudinary);
         req.body.admin.profilePhoto = uploadToCloudinary?.secure_url;
         // console.log(req.body);
     }

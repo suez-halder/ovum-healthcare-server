@@ -4,11 +4,13 @@ import multer from "multer";
 import path from "path";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import config from "../config";
+import { TCloudinaryResponse, TFile } from "../app/interfaces/file.types";
 
 cloudinary.config({
-    cloud_name: "daqbfrotf",
-    api_key: "471275653895265",
-    api_secret: "211PdzVrnTwVa43n8YowJOHscL4",
+    cloud_name: config.cloudinary.cloud_name,
+    api_key: config.cloudinary.api_key,
+    api_secret: config.cloudinary.api_secret,
 });
 
 //! upload file to local using multer
@@ -24,14 +26,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //! upload file to cloudinary
-const uploadToCloudinary = async (file: any) => {
+const uploadToCloudinary = async (
+    file: TFile
+): Promise<TCloudinaryResponse | undefined> => {
     console.log({ file });
 
     return new Promise((resolve, reject) => {
         cloudinary.uploader.upload(
             file.path,
-            { public_id: file.originalname },
-            (error, result) => {
+            // { public_id: file.originalname },
+            (error: Error, result: TCloudinaryResponse) => {
                 fs.unlinkSync(file.path); // ? upload hoye jawar pore local theke delete kore dibe
                 if (error) {
                     reject(error);
