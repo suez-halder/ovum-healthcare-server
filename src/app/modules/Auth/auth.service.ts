@@ -2,7 +2,7 @@
 import prisma from "../../../shared/prisma";
 import * as bcrypt from "bcrypt";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import { Secret } from "jsonwebtoken";
 import { UserStatus } from "@prisma/client";
 import config from "../../../config";
 
@@ -82,7 +82,7 @@ const refreshToken = async (token: string) => {
     const accessToken = jwtHelpers.generateToken(
         {
             email: userData.email,
-            drole: userData.role,
+            role: userData.role,
         },
         config.jwt.jwt_secret as Secret,
         config.jwt.expires_in as string
@@ -94,7 +94,51 @@ const refreshToken = async (token: string) => {
     };
 };
 
+// ------------------ //
+//! Change Password
+// ------------------ //
+
+const changePassword = async (user: any, payload: any) => {
+    // console.log(user);
+
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+        },
+    });
+
+    const isPasswordCorrect: boolean = await bcrypt.compare(
+        payload.oldPassword,
+        userData.password
+    );
+
+    if (!isPasswordCorrect) {
+        throw new Error("Password incorrect");
+    }
+
+    const hashedPassword: string = bcrypt.hashSync(
+        payload.newPassword,
+        Number(config.salt_rounds) as number
+    );
+
+    await prisma.user.update({
+        where: {
+            email: userData.email,
+            status: UserStatus.ACTIVE,
+        },
+        data: {
+            password: hashedPassword,
+            needPasswordChange: false,
+        },
+    });
+
+    return {
+        message: "Password changed successfully!",
+    };
+};
+
 export const AuthServices = {
     loginUser,
     refreshToken,
+    changePassword,
 };
