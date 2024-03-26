@@ -56,6 +56,16 @@ router.post(
 //!  Get All Users
 // * -------------- * //
 
-router.get("/", userController.getAllUsersFromDB);
+router.get(
+    "/",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    userController.getAllUsersFromDB
+);
+
+// * --------------------- * //
+//!  Change Profile Status
+// * --------------------- * //
+
+router.patch("/:id/status", userController.changeProfileStatus);
 
 export const UserRoutes = router;
