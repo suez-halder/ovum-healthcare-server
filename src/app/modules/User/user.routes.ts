@@ -5,6 +5,7 @@ import express, { NextFunction, Request, Response } from "express";
 
 import { fileUploader } from "../../../helpers/fileUploader";
 import auth from "../../middlewares/auth";
+import validateRequest from "../../middlewares/validateRequest";
 import { userController } from "./user.controller";
 import { userValidation } from "./user.validation";
 
@@ -66,6 +67,11 @@ router.get(
 //!  Change Profile Status
 // * --------------------- * //
 
-router.patch("/:id/status", userController.changeProfileStatus);
+router.patch(
+    "/:id/status",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    validateRequest(userValidation.changeProfileStatus),
+    userController.changeProfileStatus
+);
 
 export const UserRoutes = router;

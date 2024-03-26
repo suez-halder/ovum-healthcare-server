@@ -1,6 +1,6 @@
 //* src/app/modules/User/user.validation.ts
 
-import { Gender } from "@prisma/client";
+import { Gender, UserStatus } from "@prisma/client";
 import { z } from "zod";
 
 // * -------------------------- * //
@@ -86,8 +86,17 @@ const createPatient = z.object({
     }),
 });
 
+// * -------------------------- * //
+//! Change Profile Status
+// * -------------------------- * //
+
+const changeProfileStatus = z.object({
+    status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED, UserStatus.DELETED]),
+});
+
 export const userValidation = {
     createAdmin,
     createDoctor,
     createPatient,
+    changeProfileStatus,
 };
