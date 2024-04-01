@@ -2,6 +2,7 @@
 
 import { Request, Response } from "express";
 import httpStatus from "http-status";
+import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import sendResponse from "../../../shared/sendResponse";
@@ -75,9 +76,9 @@ const getAllUsersFromDB = catchAsync(async (req, res) => {
     });
 });
 
-// * -------------- * //
+// * --------------------- * //
 //!  Change Profile Status
-// * -------------- * //
+// * --------------------- * //
 
 const changeProfileStatus = catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -91,10 +92,30 @@ const changeProfileStatus = catchAsync(async (req, res) => {
     });
 });
 
+// * -------------- * //
+//!  Get My Profile
+// * -------------- * //
+
+const getMyProfile = catchAsync(async (req, res) => {
+    console.log(req.user);
+
+    const user = req.user;
+
+    const result = await userService.getMyProfile(user as JwtPayload);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "My profile data retrieved successfully!",
+        data: result,
+    });
+});
+
 export const userController = {
     createAdmin,
     createDoctor,
     createPatient,
     getAllUsersFromDB,
     changeProfileStatus,
+    getMyProfile,
 };
