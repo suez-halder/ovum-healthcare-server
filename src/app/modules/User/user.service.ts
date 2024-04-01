@@ -14,6 +14,7 @@ import config from "../../../config";
 import { fileUploader } from "../../../helpers/fileUploader";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { TAuthUser } from "../../interfaces/common";
 import { TFile } from "../../interfaces/file.types";
 import { TPaginationOptions } from "../../interfaces/pagination.types";
 import { userSearchableFields } from "./user.constant";
@@ -358,7 +359,7 @@ const getMyProfile = async (user: any) => {
 //!  Update My Profile
 // * --------------------- * //
 
-const updateMyProfile = async (user: any, req: Request) => {
+const updateMyProfile = async (user: TAuthUser, req: Request) => {
     //? check-1: if user exists
     const userInfo = await prisma.user.findUniqueOrThrow({
         where: {

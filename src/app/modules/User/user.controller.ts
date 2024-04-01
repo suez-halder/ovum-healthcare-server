@@ -6,6 +6,7 @@ import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import sendResponse from "../../../shared/sendResponse";
+import { TAuthUser } from "../../interfaces/common";
 import { userFilterableFields } from "./user.constant";
 import { userService } from "./user.service";
 
@@ -97,11 +98,9 @@ const changeProfileStatus = catchAsync(async (req, res) => {
 // * -------------- * //
 
 const getMyProfile = catchAsync(async (req, res) => {
-    console.log(req.user);
+    const user = req.user as TAuthUser;
 
-    const user = req.user;
-
-    const result = await userService.getMyProfile(user as JwtPayload);
+    const result = await userService.getMyProfile(user);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -116,10 +115,10 @@ const getMyProfile = catchAsync(async (req, res) => {
 // * --------------------- * //
 
 const updateMyProfile = catchAsync(async (req, res) => {
-    const user = req.user;
+    const user = req.user as TAuthUser;
 
     const result = await userService.updateMyProfile(
-        user as JwtPayload,
+        user,
         // req.body
         req // has both req.body and req.file
     );
