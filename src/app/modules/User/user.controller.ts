@@ -120,7 +120,8 @@ const updateMyProfile = catchAsync(async (req, res) => {
 
     const result = await userService.updateMyProfile(
         user as JwtPayload,
-        req.body
+        // req.body
+        req // has both req.body and req.file
     );
 
     sendResponse(res, {

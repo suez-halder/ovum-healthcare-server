@@ -358,7 +358,7 @@ const getMyProfile = async (user: any) => {
 //!  Update My Profile
 // * --------------------- * //
 
-const updateMyProfile = async (user: any, payload: any) => {
+const updateMyProfile = async (user: any, req: Request) => {
     //? check-1: if user exists
     const userInfo = await prisma.user.findUniqueOrThrow({
         where: {
@@ -366,6 +366,13 @@ const updateMyProfile = async (user: any, payload: any) => {
             status: UserStatus.ACTIVE,
         },
     });
+
+    // ! update profile photo
+    const file = req.file as TFile;
+    if (file) {
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        req.body.profilePhoto = uploadToCloudinary?.secure_url;
+    }
 
     //? check-2: which role
     let profileInfo;
@@ -375,28 +382,28 @@ const updateMyProfile = async (user: any, payload: any) => {
             where: {
                 email: userInfo.email,
             },
-            data: payload,
+            data: req.body,
         });
     } else if (userInfo.role === UserRole.ADMIN) {
         profileInfo = await prisma.admin.update({
             where: {
                 email: userInfo.email,
             },
-            data: payload,
+            data: req.body,
         });
     } else if (userInfo.role === UserRole.DOCTOR) {
         profileInfo = await prisma.doctor.update({
             where: {
                 email: userInfo.email,
             },
-            data: payload,
+            data: req.body,
         });
     } else if (userInfo.role === UserRole.PATIENT) {
         profileInfo = await prisma.patient.update({
             where: {
                 email: userInfo.email,
             },
-            data: payload,
+            data: req.body,
         });
     }
 
