@@ -1,5 +1,6 @@
 //* src/app/modules/Specialties/specialties.service.ts
 
+import { Specialties } from "@prisma/client";
 import { Request } from "express";
 import { fileUploader } from "../../../helpers/fileUploader";
 import prisma from "../../../shared/prisma";
@@ -23,6 +24,28 @@ const createSpecialtyIntoDB = async (req: Request) => {
     return result;
 };
 
+// * -------------------------- * //
+//!  Get All Specialties
+// * -------------------------- * //
+const getAllSpecialtyFromDB = async (): Promise<Specialties[]> => {
+    return await prisma.specialties.findMany();
+};
+
+// * -------------------------- * //
+//!  Delete Specialty
+// * -------------------------- * //
+
+const deleteSpecialtyFromDB = async (id: string): Promise<Specialties> => {
+    const result = await prisma.specialties.delete({
+        where: {
+            id,
+        },
+    });
+    return result;
+};
+
 export const specialtiesService = {
     createSpecialtyIntoDB,
+    getAllSpecialtyFromDB,
+    deleteSpecialtyFromDB,
 };
