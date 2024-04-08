@@ -13,6 +13,7 @@ import { DoctorService } from "./doctor.service";
 
 const getAllDoctorsFromDB = catchAsync(async (req, res) => {
     const filters = pick(req.query, doctorFilterableFields);
+    console.log("filters: ", filters);
     const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
     const result = await DoctorService.getAllDoctorsFromDB(filters, options);
     sendResponse(res, {

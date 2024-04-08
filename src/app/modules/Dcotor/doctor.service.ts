@@ -29,8 +29,8 @@ const getAllDoctorsFromDB = async (filters: any, options: any) => {
         });
     }
 
+    // doctor > doctorSpecialties > specialties > title
     if (specialties && specialties.length > 0) {
-        // Corrected specialties condition
         andConditions.push({
             doctorSpecialties: {
                 some: {
