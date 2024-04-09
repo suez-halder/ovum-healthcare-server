@@ -97,7 +97,7 @@ const updatePatientIntoDB = async (id: string, payload: any) => {
         },
     });
 
-    const result = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
         //* update patient data
         const updatedPatient = await tx.patient.update({
             where: {
@@ -124,9 +124,29 @@ const updatePatientIntoDB = async (id: string, payload: any) => {
 
             console.log(healthData);
         }
+
+        if (medicalReport) {
+            // patientId unique na, tai upsert kora jabena
+            const report = await tx.medicalReport.create({
+                data: {
+                    ...medicalReport,
+                    patientId: patientInfo.id,
+                },
+            });
+        }
     });
 
-    // return result;
+    const result = await prisma.patient.findUnique({
+        where: {
+            id: patientInfo.id,
+        },
+        include: {
+            patientHealthData: true,
+            medicalReport: true,
+        },
+    });
+
+    return result;
 };
 
 const deletePatientFromDB = async (id: string) => {
