@@ -1,3 +1,5 @@
+//* src/app/modules/Patient/patient.controller.ts
+
 import { Request, Response } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
@@ -34,7 +36,8 @@ const getPatientByIdFromDB = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updatePatientIntoDB = catchAsync(async (req: Request, res: Response) => {
-    const result = await PatientService.updatePatientIntoDB();
+    const { id } = req.params;
+    const result = await PatientService.updatePatientIntoDB(id, req.body);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

@@ -1,3 +1,5 @@
+//* src/app/modules/Patient/patient.interface.ts
+
 import { BloodGroup, Gender, MaritalStatus } from "@prisma/client";
 
 export type TPatientFilterRequest = {
