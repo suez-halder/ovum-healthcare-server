@@ -88,7 +88,14 @@ const getPatientByIdFromDB = async (id: string): Promise<Patient | null> => {
     return result;
 };
 
-const updatePatientIntoDB = async (id: string, payload: any) => {
+// * -------------------------------------------------- * //
+//! update patient (patientHealthData, medicalReport)
+// * -------------------------------------------------- * //
+
+const updatePatientIntoDB = async (
+    id: string,
+    payload: TPatientUpdate
+): Promise<Patient | null> => {
     const { patientHealthData, medicalReport, ...patientData } = payload;
 
     const patientInfo = await prisma.patient.findUniqueOrThrow({
@@ -99,7 +106,7 @@ const updatePatientIntoDB = async (id: string, payload: any) => {
 
     await prisma.$transaction(async (tx) => {
         //* update patient data
-        const updatedPatient = await tx.patient.update({
+        await tx.patient.update({
             where: {
                 id,
             },
@@ -127,7 +134,7 @@ const updatePatientIntoDB = async (id: string, payload: any) => {
 
         if (medicalReport) {
             // patientId unique na, tai upsert kora jabena
-            const report = await tx.medicalReport.create({
+            await tx.medicalReport.create({
                 data: {
                     ...medicalReport,
                     patientId: patientInfo.id,
@@ -150,11 +157,65 @@ const updatePatientIntoDB = async (id: string, payload: any) => {
 };
 
 const deletePatientFromDB = async (id: string) => {
-    console.log("Patient deleted");
+    //* step-1: je foreign field e @relation nai, setake aage delete korte hobe, example: patientHealthData, medicalReport
+    //* step-2: schema delete korte hobe
+    //* step-3: tarpor @relation lekha jeta thakbe seta delete korte hobe. example: user
+
+    const result = await prisma.$transaction(async (tx) => {
+        // step-1: delete medical report
+        await tx.medicalReport.deleteMany({
+            where: {
+                patientId: id,
+            },
+        });
+
+        // step-1: delete patient health data
+        await tx.patientHealthData.delete({
+            where: {
+                patientId: id,
+            },
+        });
+
+        // step-2: delete patient schema
+        const deletedPatient = await tx.patient.delete({
+            where: {
+                id,
+            },
+        });
+
+        // step-2: delete user
+        await tx.user.delete({
+            where: {
+                email: deletedPatient.email,
+            },
+        });
+
+        return deletedPatient;
+    });
+
+    return result;
 };
 
 const softDeletePatient = async (id: string) => {
-    console.log("Patient soft deleted");
+    return await prisma.$transaction(async (tx) => {
+        const deletedPatient = await tx.patient.update({
+            where: { id },
+            data: {
+                isDeleted: true,
+            },
+        });
+
+        await tx.user.update({
+            where: {
+                email: deletedPatient.email,
+            },
+            data: {
+                status: UserStatus.DELETED,
+            },
+        });
+
+        return deletedPatient;
+    });
 };
 
 export const PatientService = {
