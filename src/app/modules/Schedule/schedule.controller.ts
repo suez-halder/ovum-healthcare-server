@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import sendResponse from "../../../shared/sendResponse";
+import { TAuthUser } from "../../interfaces/common";
 import { ScheduleService } from "./schedule.service";
 
 // * -------------------------- * //
@@ -26,11 +27,15 @@ const createScheduleIntoDB = catchAsync(async (req, res) => {
 // * -------------------------- * //
 
 const getAllSchedulesFromDB = catchAsync(async (req, res) => {
-    const filters = pick(req.query, ["startDateTime", "endDateTime"]);
+    const filters = pick(req.query, ["startDate", "endDate"]);
     const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+    const user = req.user as TAuthUser;
+
     const result = await ScheduleService.getAllSchedulesFromDB(
         filters,
-        options
+        options,
+        user
     );
 
     sendResponse(res, {
