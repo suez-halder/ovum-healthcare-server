@@ -7,6 +7,8 @@ import { ScheduleController } from "./schedule.controller";
 
 const router = express.Router();
 
+router.get("/", ScheduleController.getAllSchedulesFromDB);
+
 router.post(
     "/",
     auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),

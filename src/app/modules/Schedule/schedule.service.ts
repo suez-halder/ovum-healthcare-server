@@ -1,8 +1,10 @@
 //* src/app/modules/Schedule/schedule.service.ts
 
-import { Schedule } from "@prisma/client";
+import { Prisma, Schedule } from "@prisma/client";
 import { addHours, addMinutes, format } from "date-fns";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { TPaginationOptions } from "../../interfaces/pagination.types";
 import { TSchedule } from "./schedule.interface";
 
 // * -------------------------- * //
@@ -73,6 +75,60 @@ const createScheduleIntoDB = async (
     return schedules;
 };
 
+// * -------------------------- * //
+//! Get All Schedules
+// * -------------------------- * //
+
+const getAllSchedulesFromDB = async (
+    filters: any,
+    options: TPaginationOptions
+) => {
+    const { limit, page, skip } = paginationHelper.calculatePagination(options);
+    const { searchTerm, ...filterData } = filters;
+
+    const andConditions = [];
+
+    if (Object.keys(filterData).length > 0) {
+        andConditions.push({
+            AND: Object.keys(filterData).map((key) => {
+                return {
+                    [key]: {
+                        equals: (filterData as any)[key],
+                    },
+                };
+            }),
+        });
+    }
+
+    const whereConditions: Prisma.ScheduleWhereInput =
+        andConditions.length > 0 ? { AND: andConditions } : {};
+
+    const result = await prisma.schedule.findMany({
+        where: whereConditions,
+        skip,
+        take: limit,
+        orderBy:
+            options.sortBy && options.sortOrder
+                ? { [options.sortBy]: options.sortOrder }
+                : {
+                      createdAt: "desc",
+                  },
+    });
+    const total = await prisma.schedule.count({
+        where: whereConditions,
+    });
+
+    return {
+        meta: {
+            total,
+            page,
+            limit,
+        },
+        data: result,
+    };
+};
+
 export const ScheduleService = {
     createScheduleIntoDB,
+    getAllSchedulesFromDB,
 };
