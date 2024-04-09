@@ -1,13 +1,17 @@
 //* src/app/modules/Schedule/schedule.service.ts
 
+import { Schedule } from "@prisma/client";
 import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../../shared/prisma";
+import { TSchedule } from "./schedule.interface";
 
 // * -------------------------- * //
 //!  Create Schedule
 // * -------------------------- * //
 
-const createScheduleIntoDB = async (payload: any) => {
+const createScheduleIntoDB = async (
+    payload: TSchedule
+): Promise<Schedule[]> => {
     const { startDate, endDate, startTime, endTime } = payload;
 
     const intervalTime = 30;
@@ -45,11 +49,20 @@ const createScheduleIntoDB = async (payload: any) => {
                 endDateTime: addMinutes(startDateTime, intervalTime),
             };
 
-            // console.log(scheduleData);
-            const result = await prisma.schedule.create({
-                data: scheduleData,
+            const existingSchedule = await prisma.schedule.findFirst({
+                where: {
+                    startDateTime: scheduleData.startDateTime,
+                    endDateTime: scheduleData.endDateTime,
+                },
             });
-            schedules.push(result);
+
+            if (!existingSchedule) {
+                // console.log(scheduleData);
+                const result = await prisma.schedule.create({
+                    data: scheduleData,
+                });
+                schedules.push(result);
+            }
 
             startDateTime.setMinutes(startDateTime.getMinutes() + intervalTime);
         }
