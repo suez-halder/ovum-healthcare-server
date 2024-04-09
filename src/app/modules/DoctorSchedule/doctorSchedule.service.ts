@@ -3,17 +3,31 @@
 import prisma from "../../../shared/prisma";
 
 // * -------------------------- * //
-//!  Create Doctor Schedules
+//!  Create Doctor Schedule
 // * -------------------------- * //
 
-const createDoctorScheduleIntoDB = async (user: any) => {
+const createDoctorScheduleIntoDB = async (
+    user: any,
+    payload: {
+        scheduleIds: string[];
+    }
+) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             email: user.email,
         },
     });
 
-    console.log(doctorData);
+    const doctorScheduleData = payload.scheduleIds.map((scheduleId) => ({
+        doctorId: doctorData.id,
+        scheduleId,
+    }));
+
+    const result = await prisma.doctorSchedules.createMany({
+        data: doctorScheduleData,
+    });
+
+    return result;
 };
 
 export const DoctorScheduleService = {
