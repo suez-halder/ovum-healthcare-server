@@ -101,6 +101,7 @@ const updatePatientIntoDB = async (
     const patientInfo = await prisma.patient.findUniqueOrThrow({
         where: {
             id,
+            isDeleted: false,
         },
     });
 
@@ -156,7 +157,11 @@ const updatePatientIntoDB = async (
     return result;
 };
 
-const deletePatientFromDB = async (id: string) => {
+// * ----------------- * //
+//!  delete patient
+// * ----------------- * //
+
+const deletePatientFromDB = async (id: string): Promise<Patient | null> => {
     //* step-1: je foreign field e @relation nai, setake aage delete korte hobe, example: patientHealthData, medicalReport
     //* step-2: schema delete korte hobe
     //* step-3: tarpor @relation lekha jeta thakbe seta delete korte hobe. example: user
@@ -196,7 +201,7 @@ const deletePatientFromDB = async (id: string) => {
     return result;
 };
 
-const softDeletePatient = async (id: string) => {
+const softDeletePatient = async (id: string): Promise<Patient | null> => {
     return await prisma.$transaction(async (tx) => {
         const deletedPatient = await tx.patient.update({
             where: { id },
