@@ -19,16 +19,22 @@ const createScheduleIntoDB = async (payload: any) => {
 
     while (currentDate <= lastDate) {
         const startDateTime = new Date(
-            addHours(
-                `${format(currentDate, "yyyy-MM-dd")}`,
-                Number(startTime.split(":")[0])
+            addMinutes(
+                addHours(
+                    `${format(currentDate, "yyyy-MM-dd")}`,
+                    Number(startTime.split(":")[0])
+                ),
+                Number(startTime.split(":")[1])
             )
         );
 
         const endDateTime = new Date(
-            addHours(
-                `${format(currentDate, "yyyy-MM-dd")}`,
-                Number(endTime.split(":")[0])
+            addMinutes(
+                addHours(
+                    `${format(currentDate, "yyyy-MM-dd")}`,
+                    Number(endTime.split(":")[0])
+                ),
+                Number(endTime.split(":")[1])
             )
         );
 
