@@ -61,7 +61,7 @@ model Doctor {
   user              User                @relation(fields: [email], references: [email])
   doctorSpecialties DoctorSpecialties[]
   doctorSchedules   DoctorSchedules[]
-  appoiintment      Appoiintment[]
+  appointment       Appointment[]
 
   @@map("doctors")
 }
@@ -80,7 +80,7 @@ model Patient {
   user              User               @relation(references: [email], fields: [email])
   patientHealthData PatientHealthData?
   medicalReport     MedicalReport[]
-  appoiintment      Appoiintment[]
+  appointment       Appointment[]
 
   @@map("patients")
 }
@@ -150,7 +150,7 @@ model Schedule {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   doctorSchedules DoctorSchedules[]
-  appoiintment    Appoiintment?
+  appointment     Appointment?
 
   @@map("schedules")
 }
@@ -170,7 +170,7 @@ model DoctorSchedules {
   @@map("doctor_schedules")
 }
 
-model Appoiintment {
+model Appointment {
   id String @id @default(uuid())
 
   patientId String
@@ -187,6 +187,8 @@ model Appoiintment {
   paymentStatus  PaymentStatus      @default(UNPAID)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+
+  @@map("appointments")
 }
 
 enum UserRole {
