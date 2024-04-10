@@ -38,6 +38,11 @@ const createAppointmentIntoDB = async (user: TAuthUser, payload: any) => {
             scheduleId: payload.scheduleId,
             videoCallingId,
         },
+        include: {
+            patient: true,
+            doctor: true,
+            schedule: true,
+        },
     });
 
     return result;
