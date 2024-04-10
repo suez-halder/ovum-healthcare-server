@@ -170,7 +170,35 @@ const getAllSchedulesFromDB = async (
     };
 };
 
+// * ------------------------------- * //
+//! Get Single Schedule
+// * -------------------------------- * //
+
+const getScheduleByIdFromDB = async (id: string): Promise<Schedule | null> => {
+    const result = await prisma.schedule.findUnique({
+        where: {
+            id,
+        },
+    });
+    return result;
+};
+
+// * ------------------------------- * //
+//! Delete Schedule
+// * -------------------------------- * //
+
+const deleteScheduleFromDB = async (id: string): Promise<Schedule> => {
+    const result = await prisma.schedule.delete({
+        where: {
+            id,
+        },
+    });
+    return result;
+};
+
 export const ScheduleService = {
     createScheduleIntoDB,
     getAllSchedulesFromDB,
+    getScheduleByIdFromDB,
+    deleteScheduleFromDB,
 };

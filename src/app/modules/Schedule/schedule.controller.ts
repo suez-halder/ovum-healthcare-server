@@ -47,7 +47,39 @@ const getAllSchedulesFromDB = catchAsync(async (req, res) => {
     });
 });
 
+// * ------------------------------- * //
+//! Get Single Schedule
+// * -------------------------------- * //
+
+const getScheduleByIdFromDB = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await ScheduleService.getScheduleByIdFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Schedule retrieval successfully",
+        data: result,
+    });
+});
+
+// * ------------------------------- * //
+//! Delete Schedule
+// * -------------------------------- * //
+
+const deleteScheduleFromDB = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await ScheduleService.deleteScheduleFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Schedule deleted successfully",
+        data: result,
+    });
+});
+
 export const ScheduleController = {
     createScheduleIntoDB,
     getAllSchedulesFromDB,
+    getScheduleByIdFromDB,
+    deleteScheduleFromDB,
 };
