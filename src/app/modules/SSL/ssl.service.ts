@@ -69,6 +69,7 @@ const initPayment = async (paymentData: TPaymentData) => {
 // * --------------------- * //
 
 const validatePayment = async (payload: any) => {
+    // eikhane payload er type any e hobe, cause sslcommerz theke ekekbar ekek response dibe
     try {
         const response = await axios({
             method: "GET",
