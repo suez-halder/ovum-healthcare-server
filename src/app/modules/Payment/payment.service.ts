@@ -50,19 +50,25 @@ amount=1150.00&bank_tran_id=151114130739MqCBNx5&card_brand=VISA&card_issuer=BRAC
 */
 
 const validatePayment = async (payload: any) => {
-    if (!payload || !payload.status || !(payload.status === "VALID")) {
-        return {
-            message: "Invalid Payment Request!",
-        };
-    }
+    // TODO: Live Link/paid hosting use korle ei code kaaj korbe
+    // if (config.env !== "development") {
+    //     if (!payload || !payload.status || !(payload.status === "VALID")) {
+    //         return {
+    //             message: "Invalid Payment Request!",
+    //         };
+    //     }
 
-    const response = await SSLService.validatePayment(payload);
+    //     const response = await SSLService.validatePayment(payload);
 
-    if (response?.status !== "VALID") {
-        return {
-            message: "Payment Failed!",
-        };
-    }
+    //     if (response?.status !== "VALID") {
+    //         return {
+    //             message: "Payment Failed!",
+    //         };
+    //     }
+    // }
+
+    //! development environment e check korar jonno use kortesi
+    const response = payload;
 
     await prisma.$transaction(async (tx) => {
         const updatedPaymentData = await tx.payment.update({
