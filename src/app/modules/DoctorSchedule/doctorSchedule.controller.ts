@@ -2,7 +2,9 @@
 
 import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
+import pick from "../../../shared/pick";
 import sendResponse from "../../../shared/sendResponse";
+import { TAuthUser } from "../../interfaces/common";
 import { DoctorScheduleService } from "./doctorSchedule.service";
 
 // * -------------------------- * //
@@ -24,6 +26,32 @@ const createDoctorScheduleIntoDB = catchAsync(async (req, res) => {
     });
 });
 
+// * -------------------------- * //
+//! Get Doctor Schedules
+// * -------------------------- * //
+
+const getDoctorSchedulesFromDB = catchAsync(async (req, res) => {
+    const filters = pick(req.query, ["startDate", "endDate", "isBooked"]);
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+    const user = req.user as TAuthUser;
+
+    const result = await DoctorScheduleService.getDoctorSchedulesFromDB(
+        filters,
+        options,
+        user
+    );
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "All Doctor Schedules fetched successfully!",
+        data: result.data,
+        meta: result.meta,
+    });
+});
+
 export const DoctorScheduleController = {
     createDoctorScheduleIntoDB,
+    getDoctorSchedulesFromDB,
 };
