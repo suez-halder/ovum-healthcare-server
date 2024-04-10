@@ -4,12 +4,13 @@ import axios from "axios";
 import httpStatus from "http-status";
 import config from "../../../config";
 import ApiError from "../../errors/ApiError";
+import { TPaymentData } from "./ssl.interface";
 
 // * --------------------- * //
 //!  Payment Initialization
 // * --------------------- * //
 
-const initPayment = async (paymentData: any) => {
+const initPayment = async (paymentData: TPaymentData) => {
     try {
         const data = {
             //* add store ID and password
@@ -34,7 +35,7 @@ const initPayment = async (paymentData: any) => {
             cus_state: "N/A",
             cus_postcode: "1000",
             cus_country: "Bangladesh",
-            cus_phone: paymentData.contactNumber,
+            cus_phone: paymentData.phoneNumber,
             cus_fax: "01711111111",
             ship_name: paymentData.name,
             ship_add1: "N/A",
