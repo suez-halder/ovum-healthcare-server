@@ -59,6 +59,24 @@ const createAppointmentIntoDB = async (user: TAuthUser, payload: any) => {
             },
         });
 
+        // generate transaction id -> OVUM-HEALTHCARE-datetime
+        const today = new Date();
+        const transactionId =
+            "VUM-HEALTHCARE-" +
+            today.getFullYear() +
+            today.getMonth() +
+            today.getDate() +
+            today.getHours() +
+            today.getMinutes();
+
+        await tx.payment.create({
+            data: {
+                appointmentId: appointmentData.id,
+                amount: doctorData.appointmentFee,
+                transactionId,
+            },
+        });
+
         return appointmentData;
     });
 
