@@ -8,9 +8,20 @@ import { DoctorScheduleController } from "./doctorSchedule.controller";
 const router = express.Router();
 
 router.get(
+    "/",
+    auth(
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.DOCTOR,
+        UserRole.PATIENT
+    ),
+    DoctorScheduleController.getAllDoctorSchedulesFromDB
+);
+
+router.get(
     "/my-schedule",
     auth(UserRole.DOCTOR),
-    DoctorScheduleController.getDoctorSchedulesFromDB
+    DoctorScheduleController.getMySchedulesFromDB
 );
 
 router.post(
