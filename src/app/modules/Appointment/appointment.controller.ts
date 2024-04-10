@@ -50,6 +50,10 @@ const getMyAppointment = catchAsync(async (req, res) => {
     });
 });
 
+// * -------------------------- * //
+//!  Get All Appointments
+// * -------------------------- * //
+
 const getAllAppointmentsFromDB = catchAsync(async (req, res) => {
     const filters = pick(req.query, appointmentFilterableFields);
     const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
