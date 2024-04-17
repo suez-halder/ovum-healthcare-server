@@ -1,7 +1,9 @@
 //* prisma/seed.ts
 
 import { UserRole } from "@prisma/client";
+import config from "../src/config";
 import prisma from "../src/shared/prisma";
+import bcrypt from "bcrypt";
 
 const seedSuperAdmin = async () => {
     try {
@@ -16,15 +18,19 @@ const seedSuperAdmin = async () => {
             return;
         }
 
+        const hashedPassword = await bcrypt.hash(
+            config.super_admin.super_admin_password as string,
+            Number(config.salt_rounds)
+        );
+
         const superAdminData = await prisma.user.create({
             data: {
-                email: "super@admin.com",
-                password: "superAdmin123",
+                email: config.super_admin.super_admin_email as string,
+                password: hashedPassword,
                 role: UserRole.SUPER_ADMIN,
                 admin: {
                     create: {
                         name: "Suez Halder",
-                        // email: "super@admin.com", // as already given
                         contactNumber: "0001777895421",
                     },
                 },
