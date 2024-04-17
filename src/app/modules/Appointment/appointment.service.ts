@@ -285,9 +285,63 @@ const changeAppointmentStatus = async (
     return result;
 };
 
+// * ------------------------------------------- * //
+//!  Cancel Unpaid Appointments after 30 minutes
+// * -------------------------------------------* //
+
+const cancelUnpaidAppointments = async () => {
+    const thirtyMinuteAgo = new Date(Date.now() - 30 * 60 * 1000); // 30mins into millisecond
+
+    const unpaidAppointments = await prisma.appointment.findMany({
+        where: {
+            createdAt: {
+                lte: thirtyMinuteAgo,
+            },
+            paymentStatus: PaymentStatus.UNPAID,
+        },
+    });
+
+    const appointmentIdsToCancel = unpaidAppointments.map(
+        (appointment) => appointment.id
+    );
+
+    await prisma.$transaction(async (tx) => {
+        await tx.payment.deleteMany({
+            where: {
+                appointmentId: {
+                    in: appointmentIdsToCancel, // loop chalano hoise
+                },
+            },
+        });
+
+        await tx.appointment.deleteMany({
+            where: {
+                id: {
+                    in: appointmentIdsToCancel,
+                },
+            },
+        });
+
+        for (const unpaidAppointment of unpaidAppointments) {
+            await tx.doctorSchedules.updateMany({
+                where: {
+                    doctorId: unpaidAppointment.doctorId,
+                    scheduleId: unpaidAppointment.scheduleId,
+                },
+                data: {
+                    isBooked: false,
+                },
+            });
+        }
+    });
+
+    console.log("cancelled");
+};
+
 export const AppointmentService = {
     createAppointmentIntoDB,
     getMyAppointment,
     getAllAppointmentsFromDB,
     changeAppointmentStatus,
+    cancelUnpaidAppointments,
 };
