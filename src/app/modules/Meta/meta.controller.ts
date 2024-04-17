@@ -13,7 +13,7 @@ const fetchDashboardMetaData = catchAsync(async (req, res) => {
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
-        message: "Meta Data fetched successfully!",
+        message: `${user.role} Meta Data fetched successfully!`,
         data: result,
     });
 });
