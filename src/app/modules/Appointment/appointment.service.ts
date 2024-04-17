@@ -5,7 +5,14 @@ import { TAuthUser } from "../../interfaces/common";
 import { v4 as uuidv4 } from "uuid";
 import { TPaginationOptions } from "../../interfaces/pagination.types";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { Prisma, UserRole } from "@prisma/client";
+import {
+    AppoiintmentStatus,
+    PaymentStatus,
+    Prisma,
+    UserRole,
+} from "@prisma/client";
+import ApiError from "../../errors/ApiError";
+import httpStatus from "http-status";
 
 // * -------------------------- * //
 //!  Create Appointment
@@ -241,8 +248,46 @@ const getAllAppointmentsFromDB = async (
     };
 };
 
+// * -------------------------- * //
+//!  Change Appointment Status
+// * -------------------------- * //
+
+const changeAppointmentStatus = async (
+    payload: { status: AppoiintmentStatus },
+    user: TAuthUser,
+    appointmentId: string
+) => {
+    const appointmentData = await prisma.appointment.findUniqueOrThrow({
+        where: {
+            id: appointmentId,
+        },
+        include: {
+            doctor: true,
+        },
+    });
+
+    if (user.role === UserRole.DOCTOR) {
+        if (!(user.email === appointmentData.doctor.email)) {
+            throw new ApiError(
+                httpStatus.BAD_REQUEST,
+                "This is not your appointment"
+            );
+        }
+    }
+
+    const result = await prisma.appointment.update({
+        where: {
+            id: appointmentId,
+        },
+        data: payload,
+    });
+
+    return result;
+};
+
 export const AppointmentService = {
     createAppointmentIntoDB,
     getMyAppointment,
     getAllAppointmentsFromDB,
+    changeAppointmentStatus,
 };
