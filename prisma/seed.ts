@@ -30,7 +30,7 @@ const seedSuperAdmin = async () => {
                 role: UserRole.SUPER_ADMIN,
                 admin: {
                     create: {
-                        name: "Suez Halder",
+                        name: "Super Admin",
                         contactNumber: "0001777895421",
                     },
                 },
