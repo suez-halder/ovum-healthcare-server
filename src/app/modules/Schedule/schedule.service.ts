@@ -7,6 +7,7 @@ import prisma from "../../../shared/prisma";
 import { TAuthUser } from "../../interfaces/common";
 import { TPaginationOptions } from "../../interfaces/pagination.types";
 import { TFilterRequest, TSchedule } from "./schedule.interface";
+import { convertDateTime } from "./schedule.utils";
 
 // * -------------------------- * //
 //!  Create Schedule
@@ -46,10 +47,23 @@ const createScheduleIntoDB = async (
         );
 
         while (startDateTime < endDateTime) {
-            // create 30 mins interval
+            //! create 30 mins interval
+
+            //? save time in local time
+            // const scheduleData = {
+            //     startDateTime: startDateTime,
+            //     endDateTime: addMinutes(startDateTime, intervalTime),
+            // };
+
+            const sTime = await convertDateTime(startDateTime);
+            const eTime = await convertDateTime(
+                addMinutes(startDateTime, intervalTime)
+            );
+
+            //? save time in UTC
             const scheduleData = {
-                startDateTime: startDateTime,
-                endDateTime: addMinutes(startDateTime, intervalTime),
+                startDateTime: sTime,
+                endDateTime: eTime,
             };
 
             const existingSchedule = await prisma.schedule.findFirst({
@@ -180,6 +194,19 @@ const getScheduleByIdFromDB = async (id: string): Promise<Schedule | null> => {
             id,
         },
     });
+
+    // console.log(
+    //     result?.startDateTime.getHours() +
+    //         ":" +
+    //         result?.startDateTime.getMinutes()
+    // );
+
+    // console.log(
+    //     result?.startDateTime.getUTCHours() +
+    //         ":" +
+    //         result?.startDateTime.getUTCMinutes()
+    // );
+
     return result;
 };
 
