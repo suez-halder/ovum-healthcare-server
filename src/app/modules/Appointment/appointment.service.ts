@@ -335,7 +335,7 @@ const cancelUnpaidAppointments = async () => {
         }
     });
 
-    console.log("cancelled");
+    // console.log("cancelled");
 };
 
 export const AppointmentService = {
