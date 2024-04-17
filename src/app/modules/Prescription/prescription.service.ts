@@ -6,9 +6,11 @@ import {
     Prescription,
 } from "@prisma/client";
 import httpStatus from "http-status";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import { TAuthUser } from "../../interfaces/common";
+import { TPaginationOptions } from "../../interfaces/pagination.types";
 
 // * -------------------------- * //
 //!  Create Prescription
@@ -52,6 +54,54 @@ const createPrescriptionIntoDB = async (
     return result;
 };
 
+// * -------------------------- * //
+//!  Get Patient Prescription
+// * -------------------------- * //
+
+const getPatientPrescriptionFromDB = async (
+    user: TAuthUser,
+    options: TPaginationOptions
+) => {
+    const { limit, page, skip } = paginationHelper.calculatePagination(options);
+
+    const result = await prisma.prescription.findMany({
+        where: {
+            patient: {
+                email: user.email,
+            },
+        },
+        skip,
+        take: limit,
+        orderBy:
+            options.sortBy && options.sortOrder
+                ? { [options.sortBy]: options.sortOrder }
+                : { createdAt: "desc" },
+        include: {
+            doctor: true,
+            patient: true,
+            appointment: true,
+        },
+    });
+
+    const total = await prisma.prescription.count({
+        where: {
+            patient: {
+                email: user.email,
+            },
+        },
+    });
+
+    return {
+        meta: {
+            total,
+            page,
+            limit,
+        },
+        data: result,
+    };
+};
+
 export const PrescriptionService = {
     createPrescriptionIntoDB,
+    getPatientPrescriptionFromDB,
 };
