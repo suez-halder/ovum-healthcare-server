@@ -25,7 +25,7 @@ const globalErrorHandler = (
         }
     }
 
-    res.status(successCode).json({
+    return res.status(successCode).json({
         success,
         message,
         error,
