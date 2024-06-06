@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.get(
     "/",
-    auth(UserRole.DOCTOR),
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
     ScheduleController.getAllSchedulesFromDB
 );
 
