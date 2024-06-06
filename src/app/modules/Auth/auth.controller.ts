@@ -1,6 +1,7 @@
 //* src/app/modules/Auth/auth.controller.ts
 
 import httpStatus from "http-status";
+import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
@@ -38,6 +39,12 @@ const refreshToken = catchAsync(async (req, res) => {
     const { refreshToken } = req.cookies;
     // console.log(refreshToken);
     const result = await AuthServices.refreshToken(refreshToken);
+
+    // // set refresh token into cookie
+    // const cookieOptions = {
+    //     secure: config.env === "production",
+    //     httpOnly: true,
+    // };
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
