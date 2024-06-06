@@ -11,7 +11,7 @@ import cron from "node-cron";
 
 const app: Application = express();
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 //parsers
 app.use(express.json());
