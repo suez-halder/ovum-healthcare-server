@@ -142,6 +142,7 @@ const changePassword = async (user: any, payload: any) => {
     });
 
     return {
+        status: httpStatus.OK,
         message: "Password changed successfully!",
     };
 };
