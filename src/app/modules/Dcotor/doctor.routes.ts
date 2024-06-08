@@ -12,17 +12,21 @@ router.get("/", DoctorController.getAllDoctorsFromDB);
 
 router.get("/:id", DoctorController.getDoctorByIdFromDB);
 
-router.patch("/:id", DoctorController.updateDoctorIntoDB);
+router.patch(
+    "/:id",
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
+    DoctorController.updateDoctorIntoDB
+);
 
 router.delete(
     "/:id",
-    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
     DoctorController.deleteDoctorFromDB
 );
 
 router.delete(
     "/soft/:id",
-    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
     DoctorController.softDeleteDoctorFromDB
 );
 
