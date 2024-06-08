@@ -78,13 +78,16 @@ const changePassword = catchAsync(async (req, res) => {
 //! Forgot Password
 // ------------------ //
 const forgotPassword = catchAsync(async (req, res) => {
-    await AuthServices.forgotPassword(req.body);
+    await AuthServices.forgotPassword(req.body.email);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Check your email to reset password!",
-        data: null,
+        data: {
+            status: httpStatus.OK,
+            message: "Check your email for reset link!",
+        },
     });
 });
 

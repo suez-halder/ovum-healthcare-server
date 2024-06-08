@@ -151,47 +151,77 @@ const changePassword = async (user: any, payload: any) => {
 //! Forgot Password
 // ------------------ //
 
-const forgotPassword = async (payload: { email: string }) => {
-    const userData = await prisma.user.findUniqueOrThrow({
+const forgotPassword = async (email: string) => {
+    // const userData = await prisma.user.findUniqueOrThrow({
+    //     where: {
+    //         email: payload.email,
+    //         status: UserStatus.ACTIVE,
+    //     },
+    // });
+
+    // const resetPassToken = jwtHelpers.generateToken(
+    //     { email: userData.email, role: userData.role },
+    //     config.jwt.reset_pass_token_secret as Secret,
+    //     config.jwt.reset_pass_token_expires_in as string
+    // );
+
+    const isUserExist = await prisma.user.findUnique({
         where: {
-            email: payload.email,
+            email: email,
             status: UserStatus.ACTIVE,
         },
     });
 
-    const resetPassToken = jwtHelpers.generateToken(
-        { email: userData.email, role: userData.role },
-        config.jwt.reset_pass_token_secret as Secret,
-        config.jwt.reset_pass_token_expires_in as string
-    );
+    if (!isUserExist) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "User does not exist!");
+    }
+
+    const resetPassToken = await jwtHelpers.createPasswordResetToken({
+        id: isUserExist.id,
+    });
 
     // console.log(resetPassToken);
 
     // ? FORMAT:  http://localhost:5173/reset-pass?email=suezupwork@gmail.com&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1ZXp1cHdvcmtAZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzExNDM0MzE0LCJleHAiOjE3MTE0MzQ5MTR9.2TLzIDoMSleXX88_26DLU6e__J17TMcxUSeuvz3U-MM
 
-    const resetPassLink =
+    // const resetPassLink =
+    //     config.reset_pass_link +
+    //     `?userId=${isUserExist.id}&token=${resetPassToken}`;
+
+    const resetPassLink: string =
         config.reset_pass_link +
-        `?userId=${userData.id}&token=${resetPassToken}`;
+        `?id=${isUserExist.id}&token=${resetPassToken}`;
 
     // ----------------------------- //
     //! Sending password reset email
     // ----------------------------- //
 
-    await emailSender(
-        userData.email,
-        `
-            <div>Suezupwork123@gmail.com
-                <p>Dear User,</p>
-                <p>Your password reset link: 
-                    <a href=${resetPassLink}>
-                        <button>
-                            Reset Password
-                        </button>
-                    </a>
-                </p>
-            </div>
+    // await emailSender(
+    //     userData.email,
+    //     `
+    //         <div>Suezupwork123@gmail.com
+    //             <p>Dear User,</p>
+    //             <p>Your password reset link:
+    //                 <a href=${resetPassLink}>
+    //                     <button>
+    //                         Reset Password
+    //                     </button>
+    //                 </a>
+    //             </p>
+    //         </div>
 
+    //     `
+    // );
+
+    await emailSender(
+        email,
         `
+    <div>
+      <p>Dear ${isUserExist.role},</p>
+      <p>Your password reset link: <a href=${resetPassLink}><button>RESET PASSWORD<button/></a></p>
+      <p>Thank you</p>
+    </div>
+`
     );
 
     // console.log(resetPassLink);
