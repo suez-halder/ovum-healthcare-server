@@ -232,19 +232,23 @@ const forgotPassword = async (email: string) => {
 // ------------------ //
 
 const resetPassword = async (
-    token: string,
-    payload: { id: string; password: string }
+    payload: { id: string; newPassword: string },
+    token: string
 ) => {
-    const userData = await prisma.user.findUniqueOrThrow({
+    const isUserExist = await prisma.user.findUniqueOrThrow({
         where: {
             id: payload.id,
             status: UserStatus.ACTIVE,
         },
     });
 
+    if (!isUserExist) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "User not found!");
+    }
+
     const isValidToken = jwtHelpers.verifyToken(
         token,
-        config.jwt.reset_pass_token_secret as Secret
+        config.jwt.reset_pass_token_secret as string
     );
 
     if (!isValidToken) {
@@ -253,7 +257,7 @@ const resetPassword = async (
 
     // hash password
     const password = await bcrypt.hash(
-        payload.password,
+        payload.newPassword,
         Number(config.salt_rounds) as number
     );
 
