@@ -2,11 +2,15 @@
 
 import { Doctor, Prisma, UserStatus } from "@prisma/client";
 import { Request } from "express";
+import httpStatus from "http-status";
 import { fileUploader } from "../../../helpers/fileUploader";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { asyncForEach } from "../../../shared/utils";
+import ApiError from "../../errors/ApiError";
 import { TFile } from "../../interfaces/file.types";
 import { doctorSearchableFields } from "./doctor.constant";
+import { TDoctorUpdate, TSpecialties } from "./doctor.interface";
 
 // * --------------------- * //
 //!  Get ALl Doctors
@@ -116,67 +120,85 @@ const getDoctorByIdFromDB = async (id: string): Promise<Doctor | null> => {
 // * --------------------- * //
 //!  Update Doctor Profile
 // * --------------------- * //
-const updateDoctorIntoDB = async (id: string, payload: any) => {
+const updateDoctorIntoDB = async (
+    id: string,
+    payload: Partial<TDoctorUpdate>
+): Promise<Doctor | null> => {
     const { specialties, ...doctorData } = payload;
 
-    const doctorInfo = await prisma.doctor.findUniqueOrThrow({
-        where: {
-            id,
-        },
-    });
-
-    //? We have to use transaction as while updating doctor data we need to create doctorSpecialties
-
     await prisma.$transaction(async (transactionClient) => {
-        //! update doctor profile only
-        await transactionClient.doctor.update({
+        const doctorInfo = await transactionClient.doctor.update({
             where: {
                 id,
             },
             data: doctorData,
-            include: {
-                doctorSpecialties: true,
-            },
         });
 
-        //! specialty er moddhe specialtiesId data thakle add/delete korte hobe
-        if (specialties && specialties.length > 0) {
-            //* delete doctorSpecialties of the specified doctor
-            const deleteSpecialtiesId = specialties.filter(
-                (specialty: { specialtiesId: string; isDeleted: boolean }) =>
-                    specialty.isDeleted
+        if (!doctorInfo) {
+            throw new ApiError(
+                httpStatus.BAD_REQUEST,
+                "Unable to update Doctor"
             );
-
-            for (const specialtyId of deleteSpecialtiesId) {
-                // delete dileo hoito, kintu ts array mone kore deikha deleteMany use korte hoitese
-                await transactionClient.doctorSpecialties.deleteMany({
-                    where: {
-                        doctorId: doctorInfo.id,
-                        specialtiesId: specialtyId.specialtiesId,
-                    },
-                });
-            }
-
-            //* create doctorSpecialties of the specified doctor
-            const createSpecialtiesId = specialties.filter(
-                (specialty: { specialtiesId: string; isDeleted: boolean }) =>
-                    !specialty.isDeleted
-            );
-
-            for (const specialtyId of createSpecialtiesId) {
-                await transactionClient.doctorSpecialties.create({
-                    data: {
-                        doctorId: doctorInfo.id,
-                        specialtiesId: specialtyId.specialtiesId,
-                    },
-                });
-            }
         }
+        if (specialties && specialties.length > 0) {
+            const deleteSpecialties = specialties.filter(
+                (specialty) => specialty.specialtiesId && specialty.isDeleted
+            );
+
+            const newSpecialties = specialties.filter(
+                (specialty) => specialty.specialtiesId && !specialty.isDeleted
+            );
+
+            await asyncForEach(
+                deleteSpecialties,
+                async (deleteDoctorSpeciality: TSpecialties) => {
+                    await transactionClient.doctorSpecialties.deleteMany({
+                        where: {
+                            AND: [
+                                {
+                                    doctorId: id,
+                                },
+                                {
+                                    specialtiesId:
+                                        deleteDoctorSpeciality.specialtiesId,
+                                },
+                            ],
+                        },
+                    });
+                }
+            );
+            await asyncForEach(
+                newSpecialties,
+                async (insertDoctorSpecialty: TSpecialties) => {
+                    //@ needed for already added specialties
+                    const existingSpecialties =
+                        await prisma.doctorSpecialties.findFirst({
+                            where: {
+                                specialtiesId:
+                                    insertDoctorSpecialty.specialtiesId,
+                                doctorId: id,
+                            },
+                        });
+
+                    if (!existingSpecialties) {
+                        await transactionClient.doctorSpecialties.create({
+                            data: {
+                                doctorId: id,
+                                specialtiesId:
+                                    insertDoctorSpecialty.specialtiesId,
+                            },
+                        });
+                    }
+                }
+            );
+        }
+
+        return doctorInfo;
     });
 
     const result = await prisma.doctor.findUniqueOrThrow({
         where: {
-            id: doctorInfo.id,
+            id,
         },
         include: {
             doctorSpecialties: {
